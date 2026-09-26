@@ -19,7 +19,8 @@ embassy-time-queue-utils = { version = "0.3", features = ["generic-queue-64"] }
 async-channel = "2"
 static_cell = "2"
 socket2 = { version = "0.6", features = ["all"] }
-if-addrs = "0.15"
+# link-local: without it if-addrs silently drops fe80:: addresses, which Matter needs.
+if-addrs = { version = "0.15", features = ["link-local"] }
 rand = { version = "0.10", features = ["std", "std_rng", "thread_rng"] }
 
 # IQAir's gRPC endpoint only accepts HTTP/2 (HTTP/1.1 gets a 464 from its load balancer).
