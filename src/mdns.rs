@@ -65,9 +65,7 @@ pub async fn run<C: Crypto>(
 
 /// The interface to advertise on: `MATTER_INTERFACE` if set, else the first non-loopback
 /// interface that has both IPv4 and IPv6 (preferring one with a link-local IPv6 address).
-fn pick_interface(
-    wanted: Option<&str>,
-) -> Result<(std::net::Ipv4Addr, Vec<Ipv6Addr>, u32), Error> {
+fn pick_interface(wanted: Option<&str>) -> Result<(std::net::Ipv4Addr, Vec<Ipv6Addr>, u32), Error> {
     let all = if_addrs::get_if_addrs().map_err(|_| ErrorCode::StdIoError)?;
 
     let names: Vec<&str> = match wanted {

@@ -110,7 +110,9 @@ impl DeviceState {
         let u8_of = |v: &Value| v.as_u64().map(|n| n.min(255) as u8);
         let reading = |key: &str| current[key]["value"].as_f64();
 
-        let max_speed = u8_of(&remote["maxSpeedLevel"]).filter(|&n| n > 0).unwrap_or(8);
+        let max_speed = u8_of(&remote["maxSpeedLevel"])
+            .filter(|&n| n > 0)
+            .unwrap_or(8);
 
         Self {
             id: d["id"].as_str().unwrap_or_default().to_string(),
@@ -132,7 +134,9 @@ impl DeviceState {
             temperature_f: reading("temperature"),
             humidity: reading("humidity"),
             filter_health: u8_of(&remote["filters"][0]["healthPercent"]),
-            filter_type: d["filterMaintenance"][0]["filterType"].as_str().map(str::to_string),
+            filter_type: d["filterMaintenance"][0]["filterType"]
+                .as_str()
+                .map(str::to_string),
         }
     }
 
@@ -204,7 +208,9 @@ impl Client {
         }
 
         let signin: Value = resp.json()?;
-        let user_id = signin["id"].as_str().ok_or_else(|| other("sign-in response had no id"))?;
+        let user_id = signin["id"]
+            .as_str()
+            .ok_or_else(|| other("sign-in response had no id"))?;
         let login_token = signin["loginToken"]
             .as_str()
             .ok_or_else(|| other("sign-in response had no loginToken"))?;
@@ -225,7 +231,10 @@ impl Client {
         })
         .ok_or_else(|| other("couldn't find the dashboard's main JS bundle"))?;
 
-        let js = self.get_text(&format!("{DASHBOARD_URL}{}", bundle.trim_start_matches('/')))?;
+        let js = self.get_text(&format!(
+            "{DASHBOARD_URL}{}",
+            bundle.trim_start_matches('/')
+        ))?;
         between(&js, "cloudApiAuthToken:\"Bearer ", "\"", |_| true)
             .map(str::to_string)
             .ok_or_else(|| other("couldn't find cloudApiAuthToken in the dashboard JS"))
@@ -288,7 +297,11 @@ impl Client {
 
     pub fn send(&self, session: &Session, serial: &str, control: Control) -> Result<(), ApiError> {
         let (method, tag, value) = match control {
-            Control::Power(on) => ("SetPowerMode", TAG_F2, Some(if on { POWER_ON } else { POWER_STANDBY })),
+            Control::Power(on) => (
+                "SetPowerMode",
+                TAG_F2,
+                Some(if on { POWER_ON } else { POWER_STANDBY }),
+            ),
             Control::Speed(level) => ("SetFanSpeed", TAG_F3, Some(level)),
             Control::Auto(on) => ("SetAutoMode", TAG_F2, on.then_some(1)),
             Control::Profile(p) => ("SetAutoModeProfile", TAG_F2, Some(p)),
@@ -321,7 +334,9 @@ impl Client {
         match (status, grpc_status.as_deref()) {
             (401 | 403, _) | (_, Some("16")) => Err(ApiError::Unauthorized),
             (s, _) if s >= 400 => Err(other(&format!("{method} failed: HTTP {s}"))),
-            (_, Some(code)) if code != "0" => Err(other(&format!("{method} failed: grpc-status {code}"))),
+            (_, Some(code)) if code != "0" => {
+                Err(other(&format!("{method} failed: grpc-status {code}")))
+            }
             _ => Ok(()),
         }
     }
@@ -369,13 +384,21 @@ fn trailer_status(body: &str) -> Option<String> {
             return None;
         }
         let text = String::from_utf8_lossy(&raw[5..]).to_string();
-        text.lines()
-            .find_map(|l| l.trim().strip_prefix("grpc-status:").map(|v| v.trim().to_string()))
+        text.lines().find_map(|l| {
+            l.trim()
+                .strip_prefix("grpc-status:")
+                .map(|v| v.trim().to_string())
+        })
     })
 }
 
 /// Find the first `start…end` span whose contents pass `accept`.
-fn between<'a>(haystack: &'a str, start: &str, end: &str, accept: impl Fn(&str) -> bool) -> Option<&'a str> {
+fn between<'a>(
+    haystack: &'a str,
+    start: &str,
+    end: &str,
+    accept: impl Fn(&str) -> bool,
+) -> Option<&'a str> {
     let mut rest = haystack;
     while let Some(i) = rest.find(start) {
         rest = &rest[i + start.len()..];
@@ -426,7 +449,10 @@ mod tests {
         let mut t = vec![0x80, 0, 0, 0, trailer_text.len() as u8];
         t.extend_from_slice(trailer_text);
         let trailer = base64::engine::general_purpose::STANDARD.encode(t);
-        assert_eq!(trailer_status(&format!("{data}{trailer}")).as_deref(), Some("0"));
+        assert_eq!(
+            trailer_status(&format!("{data}{trailer}")).as_deref(),
+            Some("0")
+        );
     }
 
     #[test]
@@ -442,7 +468,10 @@ mod tests {
         });
         let s = DeviceState::from_json(&d);
         assert!(s.power);
-        assert_eq!((s.speed_level, s.fan_speed, s.max_speed, s.manual_speed()), (0, 2, 8, 2));
+        assert_eq!(
+            (s.speed_level, s.fan_speed, s.max_speed, s.manual_speed()),
+            (0, 2, 8, 2)
+        );
         assert_eq!(s.co2, Some(419.0));
         assert_eq!(s.filter_health, Some(74));
     }

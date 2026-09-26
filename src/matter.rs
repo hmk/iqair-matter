@@ -33,7 +33,9 @@ use rs_matter::dm::networks::SysNetifs;
 use rs_matter::dm::{Async, Cluster, DataModel, Dataver, DeviceType, Endpoint, Node};
 use rs_matter::error::{Error, ErrorCode};
 use rs_matter::im::{EthInteractionModelState, InteractionModel};
-use rs_matter::pairing::qr::{no_optional_data, CommFlowType, NoOptionalData, QrPayload, QrTextType};
+use rs_matter::pairing::qr::{
+    no_optional_data, CommFlowType, NoOptionalData, QrPayload, QrTextType,
+};
 use rs_matter::pairing::DiscoveryCapabilities;
 use rs_matter::persist::DirKvBlobStore;
 use rs_matter::respond::DefaultResponder;
@@ -101,7 +103,9 @@ impl Identity {
                 break p;
             }
         };
-        let hex: String = (0..6).map(|_| format!("{:02X}", rng.random::<u8>())).collect();
+        let hex: String = (0..6)
+            .map(|_| format!("{:02X}", rng.random::<u8>()))
+            .collect();
 
         let id = Identity {
             passcode,
@@ -187,7 +191,11 @@ pub fn run(hub: Arc<Hub>, ch: MatterChannels, cfg: MatterConfig) -> Result<(), E
         FanLogic::new(hub.clone(), ch.fan),
     );
 
-    let node = if cfg.purifier { PURIFIER_NODE } else { FAN_NODE };
+    let node = if cfg.purifier {
+        PURIFIER_NODE
+    } else {
+        FAN_NODE
+    };
     let im = InteractionModel::new(
         matter,
         &crypto,
@@ -209,7 +217,12 @@ pub fn run(hub: Arc<Hub>, ch: MatterChannels, cfg: MatterConfig) -> Result<(), E
     let socket = async_io::Async::<UdpSocket>::bind(bind)?;
 
     let hostname: &'static str = Box::leak(id.hostname.clone().into_boxed_str());
-    let mut mdns = pin!(crate::mdns::run(matter, &crypto, hostname, cfg.interface.as_deref()));
+    let mut mdns = pin!(crate::mdns::run(
+        matter,
+        &crypto,
+        hostname,
+        cfg.interface.as_deref()
+    ));
     let mut transport = pin!(matter.run(&crypto, &socket, &socket, &socket));
 
     // Pairing info, for the logs and the web UI.

@@ -79,14 +79,20 @@ only; rs-matter doesn't have those sensor clusters yet.
 
 ## Develop
 
+Everything is in the `justfile` (`just` lists the recipes):
+
 ```sh
-cargo run   # DATA_DIR=./data WEB_BIND=127.0.0.1:8080 recommended
-cargo test
-docker build -t iqair-matter .
+just login            # sign in with the Python CLI (password prompt stays out of history)
+just import-session   # reuse that session so the bridge starts signed in
+just run              # bridge on http://127.0.0.1:8080, state in ./data
+just state            # the running bridge's state
+just send speed 3     # send a control to the running bridge
+just test && just check
+just image            # build the container; `just container` runs it locally
 ```
 
-`iqair.py` and the `justfile` are a standalone CLI for poking at the cloud API
-(`just login`, `just status`, `just speed 3`, …).
+`iqair.py` is a standalone CLI that talks to IQAir directly (`just status`,
+`just speed 3`, …). It's handy for poking at the API without the bridge.
 
 ## Notes
 

@@ -126,7 +126,10 @@ fn main() {
         open_pairing: rx.open_pairing,
     };
 
-    info!("Starting Matter device ({})", if purifier { "air purifier" } else { "fan" });
+    info!(
+        "Starting Matter device ({})",
+        if purifier { "air purifier" } else { "fan" }
+    );
     // rs-matter's futures are large; give the thread plenty of stack.
     let matter_thread = std::thread::Builder::new()
         .name("matter".into())

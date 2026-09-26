@@ -54,16 +54,17 @@ fn handle(hub: &Hub, password: Option<&str>, mut req: Request) {
 
     if path == "/health" {
         let ok = hub.snapshot().error.is_none();
-        let _ = req.respond(text(if ok { 200 } else { 503 }, if ok { "ok" } else { "degraded" }));
+        let _ = req.respond(text(
+            if ok { 200 } else { 503 },
+            if ok { "ok" } else { "degraded" },
+        ));
         return;
     }
 
     if let Some(pw) = password {
         if !authorized(&req, pw) {
-            let resp = text(401, "unauthorized").with_header(header(
-                "WWW-Authenticate",
-                "Basic realm=\"iqair-matter\"",
-            ));
+            let resp = text(401, "unauthorized")
+                .with_header(header("WWW-Authenticate", "Basic realm=\"iqair-matter\""));
             let _ = req.respond(resp);
             return;
         }
@@ -134,7 +135,8 @@ fn validate(c: Control) -> Result<Control, String> {
         Control::Profile(n) | Control::Brightness(n) => (1..=3).contains(&n),
         _ => true,
     };
-    ok.then_some(c).ok_or_else(|| "value out of range".to_string())
+    ok.then_some(c)
+        .ok_or_else(|| "value out of range".to_string())
 }
 
 fn authorized(req: &Request, password: &str) -> bool {
@@ -142,7 +144,11 @@ fn authorized(req: &Request, password: &str) -> bool {
         .iter()
         .find(|h| h.field.equiv("Authorization"))
         .and_then(|h| h.value.as_str().strip_prefix("Basic "))
-        .and_then(|b64| base64::engine::general_purpose::STANDARD.decode(b64.trim()).ok())
+        .and_then(|b64| {
+            base64::engine::general_purpose::STANDARD
+                .decode(b64.trim())
+                .ok()
+        })
         .and_then(|raw| String::from_utf8(raw).ok())
         .and_then(|userpass| userpass.split_once(':').map(|(_, pw)| pw.to_string()))
         .is_some_and(|pw| constant_time_eq(pw.as_bytes(), password.as_bytes()))
