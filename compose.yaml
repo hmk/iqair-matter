@@ -2,7 +2,7 @@
 # macvlan. Create the network once on the host (see README), then deploy this stack.
 services:
   iqair-matter:
-    image: ghcr.io/OWNER/iqair-matter:latest
+    image: ghcr.io/hmk/iqair-matter:latest
     # build: .   # or build on the server instead of pulling
     restart: unless-stopped
     environment:
