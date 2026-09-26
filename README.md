@@ -12,6 +12,11 @@ IQAir's cloud over MQTT. This bridge is a small Rust service that:
 
 It's a ~4 MB container that idles at a few MB of RAM.
 
+<p>
+  <img src="docs/desktop.png" alt="Web UI on desktop: fan speed, mode, air-quality readings, filter life and Matter pairing code" width="73%">
+  <img src="docs/phone.png" alt="Web UI on a phone in dark mode" width="24%">
+</p>
+
 ```
 Siri / Alexa / Google ──Matter──▶ iqair-matter ──HTTPS/gRPC-web──▶ IQAir cloud ──▶ Atem X
                                     │
