@@ -105,12 +105,28 @@ fn pick_interface(wanted: Option<&str>) -> Result<(std::net::Ipv4Addr, Vec<Ipv6A
             if_addrs::IfAddr::V4(ref v4) if !v4.ip.is_loopback() => Some(v4.ip),
             _ => None,
         });
-        let ipv6: Vec<Ipv6Addr> = on_iface()
+        let all_v6: Vec<std::net::Ipv6Addr> = on_iface()
             .filter_map(|ia| match ia.addr {
-                if_addrs::IfAddr::V6(ref v6) if !v6.ip.is_loopback() => Some(v6.ip.octets().into()),
+                if_addrs::IfAddr::V6(ref v6) if !v6.ip.is_loopback() => Some(v6.ip),
                 _ => None,
             })
             .collect();
+        // Skip unique-local (fc00::/7) addresses when there's anything else: Docker hands
+        // one out when IPv6 is enabled on a macvlan network, but nothing else on the LAN
+        // can route to it. Controllers reach us on the link-local address instead.
+        let routable: Vec<_> = all_v6
+            .iter()
+            .copied()
+            .filter(|ip| (ip.segments()[0] & 0xfe00) != 0xfc00)
+            .collect();
+        let ipv6: Vec<Ipv6Addr> = if routable.is_empty() {
+            all_v6
+        } else {
+            routable
+        }
+        .into_iter()
+        .map(|ip| ip.octets().into())
+        .collect();
         let index = on_iface().find_map(|ia| ia.index).unwrap_or(0);
 
         if let Some(ipv4) = ipv4 {

@@ -52,12 +52,15 @@ fn handle(hub: &Hub, password: Option<&str>, mut req: Request) {
     let path = req.url().split('?').next().unwrap_or("/").to_string();
     let method = req.method().clone();
 
+    // Liveness only: a cloud problem (or no sign-in yet) must not make the container
+    // unhealthy, or reverse proxies that skip unhealthy containers hide the UI you'd use
+    // to fix it. The body says what's wrong.
     if path == "/health" {
-        let ok = hub.snapshot().error.is_none();
-        let _ = req.respond(text(
-            if ok { 200 } else { 503 },
-            if ok { "ok" } else { "degraded" },
-        ));
+        let body = match hub.snapshot().error {
+            None => "ok".to_string(),
+            Some(e) => format!("ok (degraded: {e})"),
+        };
+        let _ = req.respond(text(200, &body));
         return;
     }
 
