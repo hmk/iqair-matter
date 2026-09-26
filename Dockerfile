@@ -1,16 +1,25 @@
 # syntax=docker/dockerfile:1
 
-# ── build: fully static musl binary ─────────────────────────────────────
-FROM rust:1-alpine AS build
-RUN apk add --no-cache musl-dev gcc
+# ── toolchain + cargo-chef ──────────────────────────────────────────────
+FROM rust:1-alpine AS chef
+RUN apk add --no-cache musl-dev gcc \
+ && cargo install cargo-chef --locked --version ^0.1
 WORKDIR /src
+
+# ── recipe: the dependency graph, without our code ──────────────────────
+FROM chef AS planner
+COPY . .
+RUN cargo chef prepare --recipe-path recipe.json
+
+# ── build: dependencies in their own layer (cached until Cargo.lock
+#    changes), then our crate. Fully static musl binary. ─────────────────
+FROM chef AS build
+COPY --from=planner /src/recipe.json recipe.json
+RUN cargo chef cook --release --locked --recipe-path recipe.json
 COPY Cargo.toml Cargo.lock ./
 COPY src src
 COPY web web
-RUN --mount=type=cache,target=/usr/local/cargo/registry \
-    --mount=type=cache,target=/usr/local/cargo/git \
-    --mount=type=cache,target=/src/target \
-    cargo build --release --locked \
+RUN cargo build --release --locked \
  && cp target/release/iqair-matter /iqair-matter
 RUN mkdir /data
 

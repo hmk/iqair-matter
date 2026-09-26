@@ -4,3 +4,7 @@ data
 .iqair_session.json
 __pycache__
 *.md
+docs
+.github
+justfile
+iqair.py
