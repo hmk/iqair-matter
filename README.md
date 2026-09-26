@@ -10,7 +10,7 @@ IQAir's cloud over MQTT. This bridge is a small Rust service that:
 - serves a local **web UI** with controls, air-quality readings, filter life and the Matter
   pairing code.
 
-It's a ~4 MB container that idles at a few MB of RAM.
+It's an approximately 4 MB container that idles at a few MB of RAM.
 
 <p>
   <img src="docs/desktop.png" alt="Web UI on desktop: fan speed, mode, air-quality readings, filter life and Matter pairing code" width="73%">
