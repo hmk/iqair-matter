@@ -10,7 +10,7 @@
 //!   WEB_BIND                       web UI address (default 0.0.0.0:8080; "off" disables)
 //!   WEB_PASSWORD                   optional basic-auth password for the web UI
 //!   MATTER_DEVICE_TYPE             "purifier" (default) or "fan"
-//!   MATTER_INTERFACE               interface to advertise on (default: auto)
+//!   MATTER_INTERFACE               interface name or IPv4 address to advertise on (default: auto)
 //!   MATTER_PORT                    Matter UDP port (default 5540)
 //!   RUST_LOG                       log level (default info)
 

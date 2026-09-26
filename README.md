@@ -53,7 +53,8 @@ network blocks. Give the container its own LAN address with **macvlan**.
    | `MATTER_DEVICE_TYPE` | `purifier` (default) or `fan`, if an ecosystem handles fans better. |
 
    Other settings: `IQAIR_SERIAL` (pick a device), `POLL_SECONDS` (default 30),
-   `WEB_BIND` (default `0.0.0.0:8080`, `off` to disable), `MATTER_INTERFACE`,
+   `WEB_BIND` (default `0.0.0.0:8080`, `off` to disable), `MATTER_INTERFACE` (an interface
+   name, or the container's LAN IP when it's on several networks),
    `MATTER_PORT`, `RUST_LOG`.
 
 3. Open `http://<IQAIR_MATTER_IP>:8080`. Scan the QR code in Apple Home, Alexa or Google
