@@ -1,0 +1,30 @@
+# Matter needs mDNS/IPv6 on the LAN, so the container gets its own LAN address via
+# macvlan. Create the network once on the host (see README), then deploy this stack.
+services:
+  iqair-matter:
+    image: ghcr.io/OWNER/iqair-matter:latest
+    # build: .   # or build on the server instead of pulling
+    restart: unless-stopped
+    environment:
+      IQAIR_EMAIL: ${IQAIR_EMAIL:-}
+      IQAIR_PASSWORD: ${IQAIR_PASSWORD:-}
+      WEB_PASSWORD: ${WEB_PASSWORD:-}
+      MATTER_DEVICE_TYPE: ${MATTER_DEVICE_TYPE:-purifier}
+    volumes:
+      - iqair-matter-data:/data
+    networks:
+      lan:
+        ipv4_address: ${IQAIR_MATTER_IP:-192.168.1.241}
+    sysctls:
+      net.ipv6.conf.all.disable_ipv6: "0"
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    mem_limit: 64m
+
+volumes:
+  iqair-matter-data:
+
+networks:
+  lan:
+    external: true

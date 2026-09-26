@@ -1,2 +1,4 @@
 .iqair_session.json
 __pycache__/
+target/
+data/

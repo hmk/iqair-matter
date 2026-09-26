@@ -1,0 +1,6 @@
+target
+data
+.git
+.iqair_session.json
+__pycache__
+*.md

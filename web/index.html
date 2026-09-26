@@ -1,0 +1,714 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>Atem X</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23EEEDE8'/%3E%3Cpath d='M0 32A32 32 0 0 1 32 0v32z' fill='%231F3A9E'/%3E%3Ccircle cx='32' cy='32' r='14' fill='%23C8302A'/%3E%3C/svg%3E">
+<style>
+/* Design tokens */
+:root {
+  --bg: #EEEDE8;
+  --surface: #DCD8CE;
+  --ink: #1E2221;
+  --muted: #5F5B54;
+  --rule: #B9B3A6;
+  --warm: #8B4A30;
+  --good: #33473B;
+  --cool: #2B4E5E;
+  --fair: #B8A56A;
+  --poor: #A77F5A;
+  --accent: #C8302A;
+  --primary: #1F3A9E;
+  --on-primary: #FFFFFF;
+  --tile: #FFFFFF;
+  --gutter: 16px;
+  --radius: 0;
+  --font: "Helvetica Neue", Helvetica, Arial, "Nimbus Sans", "Liberation Sans", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #1E1A17;
+    --surface: #2B2521;
+    --ink: #ECE6DA;
+    --muted: #A9A296;
+    --rule: #4A423B;
+    --warm: #D08E6A;
+    --good: #8FAE96;
+    --cool: #7FB0C2;
+    --fair: #CDBB82;
+    --poor: #C39A73;
+    --accent: #F0564B;
+    --primary: #8FA2F5;
+    --on-primary: #121212;
+    --tile: #F4F1EA;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #1E1A17; --surface: #2B2521; --ink: #ECE6DA; --muted: #A9A296; --rule: #4A423B;
+  --warm: #D08E6A; --good: #8FAE96; --cool: #7FB0C2; --fair: #CDBB82; --poor: #C39A73;
+  --accent: #F0564B; --primary: #8FA2F5; --on-primary: #121212; --tile: #F4F1EA;
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 400 16px/1.5 var(--font);
+  font-feature-settings: "tnum" 1;
+  font-variant-numeric: tabular-nums;
+  min-height: 100vh;
+}
+button, input { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 3px solid var(--primary); outline-offset: 2px; }
+@media (prefers-reduced-motion: no-preference) {
+  .fade { transition: background-color .25s, color .25s, opacity .25s; }
+}
+
+/* ── power band: the one full-bleed stripe ───────────────────────── */
+.band { height: 12px; background: var(--muted); }
+.band.on { background: var(--primary); }
+
+.wrap {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--gutter) 48px;
+}
+
+/* ── header ───────────────────────────────────────────────────────── */
+header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 24px 0 16px;
+  border-bottom: 2px solid var(--ink);
+}
+.brand { display: flex; align-items: flex-end; gap: 12px; min-width: 0; }
+.brand svg { flex: none; width: 40px; height: 40px; }
+h1 {
+  margin: 0;
+  font-size: 32px;
+  line-height: 1;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+.sub {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.dot {
+  display: inline-block;
+  width: 8px; height: 8px;
+  margin-right: 6px;
+  background: var(--good);
+  vertical-align: 1px;
+}
+.dot.off { background: var(--accent); }
+
+.power {
+  flex: none;
+  min-width: 112px;
+  height: 48px;
+  padding: 0 20px;
+  border: 2px solid var(--ink);
+  background: transparent;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-size: 14px;
+}
+.power[aria-pressed="true"] { background: var(--primary); border-color: var(--primary); color: var(--on-primary); }
+
+/* ── status line ──────────────────────────────────────────────────── */
+.notice {
+  margin: 16px 0 0;
+  padding: 12px 16px;
+  border-left: 6px solid var(--accent);
+  background: var(--surface);
+  font-size: 14px;
+}
+.notice[hidden] { display: none; }
+
+/* ── 12-column grid ───────────────────────────────────────────────── */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--gutter);
+  margin-top: var(--gutter);
+}
+@media (min-width: 900px) {
+  :root { --gutter: 24px; }
+  .grid { grid-template-columns: repeat(12, 1fr); }
+  .span-5 { grid-column: span 5; }
+  .span-7 { grid-column: span 7; }
+  .span-3 { grid-column: span 3; }
+  .span-4 { grid-column: span 4; }
+  .span-8 { grid-column: span 8; }
+  .span-12 { grid-column: span 12; }
+}
+/* phones + tablets: two columns, readings 2×2, everything else full width */
+@media (max-width: 899px) {
+  .span-3 { grid-column: span 1; }
+  .span-5, .span-7, .span-4, .span-8, .span-12 { grid-column: span 2; }
+  .stack-col { grid-column: span 2; }
+}
+
+.stack-col { display: grid; gap: var(--gutter); align-content: start; }
+.card {
+  position: relative;
+  background: var(--surface);
+  padding: 20px;
+  overflow: hidden;
+}
+.label {
+  margin: 0 0 12px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* ── fan: oversized numeral, cropped at the card edge ─────────────── */
+.fan { min-height: 340px; display: flex; flex-direction: column; }
+.numeral {
+  position: absolute;
+  right: -0.06em;
+  bottom: -0.2em;
+  margin: 0;
+  font-size: clamp(200px, 48vw, 360px);
+  line-height: 1;
+  font-weight: 700;
+  letter-spacing: -0.06em;
+  color: var(--accent);
+  pointer-events: none;
+  user-select: none;
+}
+.numeral.idle { color: var(--rule); }
+.fan-meta { position: relative; font-size: 14px; color: var(--muted); max-width: 55%; }
+.fan-meta strong { display: block; color: var(--ink); font-size: 20px; line-height: 1.2; }
+.segments {
+  position: relative;
+  margin-top: auto;
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 4px;
+  max-width: 60%;
+}
+.seg {
+  height: 44px;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  display: flex;
+  align-items: flex-end;
+}
+.seg span {
+  display: block;
+  width: 100%;
+  height: 4px;
+  background: var(--rule);
+}
+.seg[data-level] span { height: calc(8px + var(--h) * 4px); }
+.seg.on span { background: var(--ink); }
+.seg.running span { background: var(--muted); }
+.seg:hover span { background: var(--warm); }
+.seg-scale {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  max-width: 60%;
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* ── controls ─────────────────────────────────────────────────────── */
+.rows { display: grid; gap: 0; }
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 64px;
+  border-top: 1px solid var(--rule);
+}
+.row:first-child { border-top: 0; }
+.row-title { font-weight: 700; }
+.row-help { display: block; font-size: 13px; color: var(--muted); font-weight: 400; }
+
+.toggle {
+  position: relative;
+  flex: none;
+  width: 64px;
+  height: 32px;
+  border: 2px solid var(--ink);
+  background: transparent;
+  padding: 0;
+}
+.toggle::after {
+  content: "";
+  position: absolute;
+  top: 2px; left: 2px;
+  width: 24px; height: 24px;
+  background: var(--ink);
+}
+.toggle[aria-pressed="true"] { background: var(--primary); border-color: var(--primary); }
+.toggle[aria-pressed="true"]::after { left: auto; right: 2px; background: var(--on-primary); }
+.toggle.lock[aria-pressed="true"] {
+  background: repeating-linear-gradient(-45deg, var(--ink) 0 4px, transparent 4px 9px);
+  border-color: var(--ink);
+}
+.toggle.lock[aria-pressed="true"]::after { background: var(--ink); }
+
+.seg-ctl { display: inline-grid; grid-auto-flow: column; border: 2px solid var(--ink); }
+.seg-ctl button {
+  min-width: 80px;
+  min-height: 40px;
+  border: 0;
+  border-left: 2px solid var(--ink);
+  background: transparent;
+  font-size: 14px;
+  font-weight: 700;
+}
+.seg-ctl button:first-child { border-left: 0; }
+.seg-ctl button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+@media (max-width: 420px) { .seg-ctl button { min-width: 64px; } .row.stack { flex-direction: column; align-items: flex-start; padding: 12px 0; } }
+
+/* ── readings: quarter-circle status arc in the corner ────────────── */
+.reading { min-height: 148px; }
+.reading .arc { position: absolute; top: 0; right: 0; width: 56px; height: 56px; }
+@media (max-width: 599px) { .reading { padding: 16px; min-height: 128px; } .reading .arc { width: 40px; height: 40px; } .reading .band-label { font-size: 13px; } }
+.reading .arc path { fill: var(--rule); }
+.reading .value { margin: 0; font-size: clamp(36px, 10vw, 48px); font-weight: 700; line-height: 1; letter-spacing: -0.03em; }
+.reading .unit { font-size: 16px; font-weight: 400; color: var(--muted); letter-spacing: 0; margin-left: 4px; }
+.reading .band-label { margin: 8px 0 0; font-size: 14px; color: var(--muted); }
+.lvl-good .arc path { fill: var(--good); }
+.lvl-fair .arc path { fill: var(--fair); }
+.lvl-poor .arc path { fill: var(--poor); }
+.lvl-bad .arc path { fill: var(--accent); }
+
+/* ── filter strip ─────────────────────────────────────────────────── */
+.filter-bar { height: 16px; background: var(--rule); margin: 8px 0 8px; }
+.filter-bar div { height: 100%; background: var(--cool); width: 0; }
+.filter-meta { display: flex; justify-content: space-between; gap: 16px; font-size: 14px; color: var(--muted); flex-wrap: wrap; }
+.filter-meta strong { color: var(--ink); font-size: 20px; }
+
+/* ── pairing ──────────────────────────────────────────────────────── */
+.qr {
+  display: block;
+  width: 100%;
+  max-width: 220px;
+  aspect-ratio: 1;
+  background: var(--tile);
+  border-top: 8px solid #1E2221;
+}
+.code {
+  margin: 16px 0 4px;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+.muted { color: var(--muted); font-size: 14px; margin: 0; }
+.btn {
+  min-height: 44px;
+  padding: 0 18px;
+  border: 2px solid var(--ink);
+  background: transparent;
+  font-weight: 700;
+  font-size: 14px;
+}
+.btn.primary { background: var(--ink); color: var(--bg); }
+.btn:disabled { opacity: .5; cursor: default; }
+.actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 16px; }
+
+/* ── account ──────────────────────────────────────────────────────── */
+form { display: grid; gap: 12px; max-width: 520px; }
+@media (min-width: 600px) { form { grid-template-columns: 1fr 1fr; } form .actions { grid-column: span 2; margin-top: 0; } }
+label.field { display: grid; gap: 4px; font-size: 13px; font-weight: 700; color: var(--muted); }
+label.field input {
+  height: 44px;
+  padding: 0 12px;
+  border: 2px solid var(--ink);
+  background: var(--bg);
+  font-weight: 400;
+  font-size: 16px;
+}
+
+footer { margin-top: 32px; padding-top: 12px; border-top: 1px solid var(--rule); font-size: 12px; color: var(--muted); display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+footer button { border: 0; background: none; padding: 0; color: inherit; text-decoration: underline; font-size: 12px; }
+
+[aria-busy="true"] { opacity: .6; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+</style>
+</head>
+<body>
+<div class="band fade" id="band"></div>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <svg viewBox="0 0 40 40" aria-hidden="true">
+        <path d="M0 40A40 40 0 0 1 40 0v40z" fill="var(--primary)"/>
+        <circle cx="40" cy="40" r="17" fill="var(--accent)"/>
+      </svg>
+      <div style="min-width:0">
+        <h1>Atem X</h1>
+        <p class="sub" id="sub"><span class="dot off"></span>Connecting…</p>
+      </div>
+    </div>
+    <button class="power fade" id="power" aria-pressed="false" disabled>Off</button>
+  </header>
+
+  <p class="notice" id="notice" role="status" hidden></p>
+
+  <main class="grid">
+    <section class="card fan span-5" aria-labelledby="fan-h">
+      <h2 class="label" id="fan-h">Fan speed</h2>
+      <div class="fan-meta"><strong id="fan-title">—</strong><span id="fan-detail"></span></div>
+      <p class="numeral idle fade" id="numeral" aria-hidden="true">0</p>
+      <div class="segments" id="segments" role="group" aria-label="Set fan speed"></div>
+      <div class="seg-scale" aria-hidden="true"><span>1</span><span id="max-label">8</span></div>
+    </section>
+
+    <section class="card span-7" aria-labelledby="mode-h">
+      <h2 class="label" id="mode-h">Mode</h2>
+      <div class="rows">
+        <div class="row">
+          <span class="row-title">Smart mode<span class="row-help">Fan follows the air-quality sensors</span></span>
+          <button class="toggle fade" id="auto" aria-pressed="false" aria-label="Smart mode"></button>
+        </div>
+        <div class="row stack">
+          <span class="row-title">Smart profile<span class="row-help">How hard smart mode works</span></span>
+          <div class="seg-ctl" id="profile" role="group" aria-label="Smart profile">
+            <button data-p="1" aria-pressed="false">Quiet</button>
+            <button data-p="2" aria-pressed="false">Balanced</button>
+            <button data-p="3" aria-pressed="false">Power</button>
+          </div>
+        </div>
+        <div class="row">
+          <span class="row-title">Indicator light</span>
+          <button class="toggle fade" id="light" aria-pressed="false" aria-label="Indicator light"></button>
+        </div>
+        <div class="row">
+          <span class="row-title">Panel lock<span class="row-help">Disable the buttons on the unit</span></span>
+          <button class="toggle lock fade" id="lock" aria-pressed="false" aria-label="Panel lock"></button>
+        </div>
+      </div>
+    </section>
+
+    <section class="card reading span-3" id="r-pm25" aria-label="PM2.5">
+      <svg class="arc" viewBox="0 0 56 56" aria-hidden="true"><path d="M0 0H56V56A56 56 0 0 1 0 0z"/></svg>
+      <h2 class="label">PM2.5</h2>
+      <p class="value"><span data-v>—</span><span class="unit">µg/m³</span></p>
+      <p class="band-label" data-b></p>
+    </section>
+    <section class="card reading span-3" id="r-co2" aria-label="CO2">
+      <svg class="arc" viewBox="0 0 56 56" aria-hidden="true"><path d="M0 0H56V56A56 56 0 0 1 0 0z"/></svg>
+      <h2 class="label">CO₂</h2>
+      <p class="value"><span data-v>—</span><span class="unit">ppm</span></p>
+      <p class="band-label" data-b></p>
+    </section>
+    <section class="card reading span-3" id="r-temp" aria-label="Temperature">
+      <svg class="arc" viewBox="0 0 56 56" aria-hidden="true"><path d="M0 0H56V56A56 56 0 0 1 0 0z"/></svg>
+      <h2 class="label">Temperature</h2>
+      <p class="value"><span data-v>—</span><span class="unit" data-u>°F</span></p>
+      <p class="band-label" data-b></p>
+    </section>
+    <section class="card reading span-3" id="r-hum" aria-label="Humidity">
+      <svg class="arc" viewBox="0 0 56 56" aria-hidden="true"><path d="M0 0H56V56A56 56 0 0 1 0 0z"/></svg>
+      <h2 class="label">Humidity</h2>
+      <p class="value"><span data-v>—</span><span class="unit">%</span></p>
+      <p class="band-label" data-b></p>
+    </section>
+
+    <div class="stack-col span-8">
+    <section class="card" aria-labelledby="filter-h">
+      <h2 class="label" id="filter-h">Filter</h2>
+      <div class="filter-meta"><strong id="filter-pct">—</strong><span id="filter-type"></span></div>
+      <div class="filter-bar" role="progressbar" aria-labelledby="filter-h" aria-valuemin="0" aria-valuemax="100" id="filter-bar"><div class="fade"></div></div>
+    </section>
+
+    <section class="card" aria-labelledby="acct-h">
+      <h2 class="label" id="acct-h">IQAir account</h2>
+      <p class="muted" id="acct-status"></p>
+      <form id="login" autocomplete="on" hidden>
+        <label class="field">Email<input type="email" name="email" autocomplete="username" required></label>
+        <label class="field">Password<input type="password" name="password" autocomplete="current-password" required></label>
+        <div class="actions"><button class="btn primary" type="submit">Sign in</button></div>
+      </form>
+    </section>
+    </div>
+    <section class="card span-4" aria-labelledby="pair-h" id="pair-card">
+      <h2 class="label" id="pair-h">Matter</h2>
+      <p class="muted" id="pair-status">Starting…</p>
+      <div id="pair-body">
+        <img class="qr" id="qr" alt="Matter pairing QR code" hidden>
+        <p class="code" id="code"></p>
+        <p class="muted">Scan in Apple Home, Alexa or Google Home, or type the code.</p>
+      </div>
+      <div class="actions"><button class="btn" id="open-pairing">Open pairing window</button></div>
+    </section>
+
+  </main>
+
+  <footer>
+    <span id="updated">—</span>
+    <span><button id="refresh">Refresh now</button> · <button id="theme">Theme: auto</button></span>
+  </footer>
+</div>
+
+<script>
+"use strict";
+const $ = (id) => document.getElementById(id);
+const PROFILES = { 1: "Quiet", 2: "Balanced", 3: "Power" };
+let state = null;
+let busy = false;
+
+// ── theme toggle (per-viewer convenience only) ─────────────────────
+const THEMES = ["auto", "light", "dark"];
+function applyTheme(t) {
+  if (t === "auto") document.documentElement.removeAttribute("data-theme");
+  else document.documentElement.setAttribute("data-theme", t);
+  $("theme").textContent = "Theme: " + t;
+}
+let theme = "auto";
+try { theme = localStorage.getItem("theme") || "auto"; } catch (_) {}
+applyTheme(theme);
+$("theme").onclick = () => {
+  theme = THEMES[(THEMES.indexOf(theme) + 1) % THEMES.length];
+  try { localStorage.setItem("theme", theme); } catch (_) {}
+  applyTheme(theme);
+};
+
+// ── API ─────────────────────────────────────────────────────────────
+async function api(path, body) {
+  const opts = body === undefined ? {} : {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  };
+  const res = await fetch(path, opts);
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || ("HTTP " + res.status));
+  return data;
+}
+
+async function load() {
+  try {
+    state = await api("/api/state");
+    render();
+  } catch (e) {
+    notice("Can't reach the bridge: " + e.message);
+  }
+}
+
+async function control(action, value) {
+  if (busy) return;
+  busy = true;
+  document.body.setAttribute("aria-busy", "true");
+  try {
+    state = await api("/api/control", { action, value });
+    notice(null);
+  } catch (e) {
+    notice(e.message);
+  } finally {
+    busy = false;
+    document.body.removeAttribute("aria-busy");
+    render();
+  }
+}
+
+function notice(msg) {
+  const n = $("notice");
+  n.hidden = !msg;
+  n.textContent = msg || "";
+}
+
+// ── rendering ───────────────────────────────────────────────────────
+function level(kind, v) {
+  if (v == null) return null;
+  switch (kind) {
+    case "pm25": // US EPA 2024 breakpoints
+      return v <= 9 ? ["good", "Good"] : v <= 35.4 ? ["fair", "Moderate"] : v <= 55.4 ? ["poor", "Unhealthy for some"] : ["bad", "Unhealthy"];
+    case "co2":
+      return v < 800 ? ["good", "Fresh"] : v < 1200 ? ["fair", "Stuffy"] : v < 2000 ? ["poor", "Ventilate"] : ["bad", "Poor"];
+    case "hum":
+      return v < 30 ? ["poor", "Dry"] : v <= 60 ? ["good", "Comfortable"] : v <= 70 ? ["fair", "Humid"] : ["poor", "Very humid"];
+    case "temp":
+      return v < 62 ? ["fair", "Cool"] : v <= 78 ? ["good", "Comfortable"] : ["fair", "Warm"];
+  }
+}
+
+function setReading(id, kind, value, digits) {
+  const el = $(id);
+  el.querySelector("[data-v]").textContent = value == null ? "—" : Number(value).toFixed(digits);
+  const lv = level(kind, value);
+  el.className = el.className.replace(/\blvl-\w+/g, "").trim() + (lv ? " lvl-" + lv[0] : "");
+  el.querySelector("[data-b]").textContent = lv ? lv[1] : "";
+}
+
+function pressed(el, on) { el.setAttribute("aria-pressed", on ? "true" : "false"); }
+
+function buildSegments(max) {
+  const wrap = $("segments");
+  if (wrap.childElementCount === max) return;
+  wrap.innerHTML = "";
+  for (let i = 1; i <= max; i++) {
+    const b = document.createElement("button");
+    b.className = "seg";
+    b.dataset.level = i;
+    b.style.setProperty("--h", i);
+    b.setAttribute("aria-label", "Speed " + i);
+    b.innerHTML = "<span></span>";
+    b.onclick = () => control("speed", i);
+    wrap.appendChild(b);
+  }
+  $("max-label").textContent = max;
+}
+
+function ago(ts) {
+  if (!ts) return "never";
+  const s = Math.max(0, Math.round(Date.now() / 1000 - ts));
+  return s < 5 ? "just now" : s < 90 ? s + " s ago" : Math.round(s / 60) + " min ago";
+}
+
+function render() {
+  if (!state) return;
+  const d = state.device;
+
+  // header + band
+  $("band").classList.toggle("on", !!(d && d.power));
+  const power = $("power");
+  power.disabled = !d || busy;
+  pressed(power, d && d.power);
+  power.textContent = d && d.power ? "On" : "Off";
+  $("sub").innerHTML = "";
+  const dot = document.createElement("span");
+  dot.className = "dot" + (d && d.online ? "" : " off");
+  $("sub").append(dot, d ? (d.name + (d.online ? "" : " — offline")) : (state.error || "Connecting…"));
+
+  if (state.error && d) notice(state.error);
+  else if (!d && state.error) notice(state.error);
+
+  // fan
+  const max = (d && d.max_speed) || 8;
+  buildSegments(max);
+  const running = d && d.power ? d.fan_speed : 0;
+  const manual = d && d.power && !d.auto_mode ? (d.speed_level || d.fan_speed) : 0;
+  const num = $("numeral");
+  num.textContent = !d || !d.power ? "0" : d.auto_mode ? "A" : String(manual);
+  num.classList.toggle("idle", !d || !d.power);
+  $("fan-title").textContent = !d ? "—" : !d.power ? "Standby" : d.auto_mode ? "Smart mode" : "Speed " + manual;
+  $("fan-detail").textContent = !d || !d.power ? "" : d.auto_mode
+    ? PROFILES[d.auto_profile] + " · running at " + running
+    : "of " + max;
+  for (const b of $("segments").children) {
+    const i = Number(b.dataset.level);
+    b.classList.toggle("on", manual > 0 && i <= manual);
+    b.classList.toggle("running", manual === 0 && running > 0 && i <= running);
+    pressed(b, manual === i);
+    b.disabled = !d || busy;
+  }
+
+  // mode
+  pressed($("auto"), d && d.auto_mode);
+  pressed($("light"), d && d.light);
+  pressed($("lock"), d && d.lock);
+  for (const b of $("profile").children) pressed(b, d && d.auto_profile === Number(b.dataset.p));
+  for (const b of document.querySelectorAll(".toggle, #profile button")) b.disabled = !d || busy;
+
+  // readings
+  setReading("r-pm25", "pm25", d && d.pm25, 0);
+  setReading("r-co2", "co2", d && d.co2, 0);
+  setReading("r-temp", "temp", d && d.temperature_f, 0);
+  setReading("r-hum", "hum", d && d.humidity, 0);
+
+  // filter
+  const fh = d && d.filter_health;
+  $("filter-pct").textContent = fh == null ? "—" : fh + "% left";
+  $("filter-type").textContent = (d && d.filter_type) || "";
+  $("filter-bar").setAttribute("aria-valuenow", fh || 0);
+  $("filter-bar").firstElementChild.style.width = (fh || 0) + "%";
+
+  // pairing
+  const p = state.pairing || {};
+  const paired = p.fabrics > 0;
+  $("pair-status").textContent = !p.manual_code ? "Starting…"
+    : p.window_open ? (paired ? "Paired with " + p.fabrics + " · pairing window open for another controller" : "Ready to pair")
+    : paired ? "Paired with " + p.fabrics + (p.fabrics === 1 ? " controller" : " controllers")
+    : "Pairing window closed — open it to pair";
+  const showCode = p.manual_code && (p.window_open || !paired);
+  $("pair-body").hidden = !showCode;
+  if (showCode && $("qr").dataset.code !== p.qr_text) {
+    $("qr").src = "/pairing.svg?c=" + encodeURIComponent(p.qr_text);
+    $("qr").dataset.code = p.qr_text;
+    $("qr").hidden = false;
+  }
+  $("code").textContent = p.manual_code || "";
+  $("open-pairing").disabled = !p.manual_code || p.window_open;
+  $("open-pairing").textContent = p.window_open ? "Pairing window open" : paired ? "Pair another controller" : "Open pairing window";
+
+  // account
+  const form = $("login");
+  if (state.credentials_from_env) {
+    $("acct-status").textContent = "Signed in as " + state.account_email + " (set by environment variables).";
+    form.hidden = true;
+  } else if (state.has_credentials) {
+    $("acct-status").textContent = "Signed in as " + state.account_email + ". Sign in again to switch accounts.";
+    form.hidden = false;
+  } else {
+    $("acct-status").textContent = d
+      ? "Using a saved session. Sign in so the bridge can renew it on its own."
+      : "Sign in with the account you use in the IQAir app.";
+    form.hidden = false;
+  }
+
+  $("updated").textContent = "Updated " + ago(state.last_poll) + " · " + (state.device_type === "fan" ? "Matter fan" : "Matter air purifier");
+}
+
+// ── events ──────────────────────────────────────────────────────────
+$("power").onclick = () => state && state.device && control("power", !state.device.power);
+$("auto").onclick = () => state && state.device && control("auto", !state.device.auto_mode);
+$("light").onclick = () => state && state.device && control("light", !state.device.light);
+$("lock").onclick = () => state && state.device && control("lock", !state.device.lock);
+for (const b of $("profile").children) b.onclick = () => control("profile", Number(b.dataset.p));
+
+$("open-pairing").onclick = async () => {
+  try { await api("/api/pairing/open", {}); setTimeout(load, 2500); } catch (e) { notice(e.message); }
+};
+$("refresh").onclick = async () => {
+  try { await api("/api/refresh", {}); setTimeout(load, 2500); } catch (e) { notice(e.message); }
+};
+$("login").onsubmit = async (ev) => {
+  ev.preventDefault();
+  const f = ev.target;
+  const btn = f.querySelector("button");
+  btn.disabled = true;
+  try {
+    state = await api("/api/credentials", { email: f.email.value, password: f.password.value });
+    f.password.value = "";
+    notice(null);
+    render();
+    setTimeout(load, 2500);
+  } catch (e) {
+    notice(e.message);
+  } finally {
+    btn.disabled = false;
+  }
+};
+
+load();
+setInterval(() => { if (!document.hidden && !busy) load(); }, 5000);
+document.addEventListener("visibilitychange", () => { if (!document.hidden) load(); });
+</script>
+</body>
+</html>
